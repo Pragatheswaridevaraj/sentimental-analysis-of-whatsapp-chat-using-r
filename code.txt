@@ -1,0 +1,82 @@
+﻿library("rwhatsapp")
+> WhatsApp <- read.csv("C:/Users/INDIA/Downloads/WhatsApp.txt", header=FALSE, comment.char="#")
+> View(WhatsApp)
+#messages per day
+library("ggplot2"); theme_set(theme_minimal())
+library("lubridate")
+ WhatsApp%>%
+  mutate(day = date(time)) %>%
+  count(day) %>%
+  ggplot(aes(x = day, y = n)) +
+  geom_bar(stat = "identity") +
+  ylab("") + xlab("") +
+  ggtitle("Messages per day")
+
+
+#no of messages
+WhatsApp%>%
+  mutate(day = date(time)) %>%
+  count(author) %>%
+  ggplot(aes(x = reorder(author, n), y = n)) +
+  geom_bar(stat = "identity") +
+  ylab("") + xlab("") +
+  coord_flip() +
+  ggtitle("Number of messages")
+
+
+#most commonly used emoji
+library("tidyr")
+WhatsApp %>%
+  unnest(emoji) %>%
+  count(author, emoji, sort = TRUE) %>%
+  group_by(author) %>%
+  top_n(n = 6, n) %>%
+  ggplot(aes(x = reorder(emoji, n), y = n, fill = author)) +
+  geom_col(show.legend = FALSE) +
+  ylab("") +
+  xlab("") +
+  coord_flip() +
+  facet_wrap(~author, ncol = 6, scales = "free_y")  +
+  ggtitle("Most often used emojis")
+
+
+
+
+
+
+#lexical diversity
+WhatsApp %>%
+  unnest_tokens(input = text,
+                output = word) %>%
+  filter(!word %in% to_remove) %>%
+  group_by(author) %>%
+  summarise(lex_diversity = n_distinct(word)) %>%
+  arrange(desc(lex_diversity)) %>%
+  ggplot(aes(x = reorder(author, lex_diversity),
+                          y = lex_diversity,
+                          fill = author)) +
+  geom_col(show.legend = FALSE) +
+  scale_y_continuous(expand = (mult = c(0, 0, 0, 500))) +
+  geom_text(aes(label = scales::comma(lex_diversity)), hjust = -0.1) +
+  ylab("unique words") +
+  xlab("") +
+  ggtitle("Lexical Diversity") +
+  coord_flip()
+#uniqueness
+o_words <- WhatsApp %>%
+  unnest_tokens(input = text,
+                output = word) %>%
+  filter(author != "Niha") %>% 
+  count(word, sort = TRUE) 
+WhatsApp%>%
+  unnest_tokens(input = text,
+                output = word) %>%
+  filter(author == "Niha") %>% 
+  count(word, sort = TRUE) %>% 
+  filter(!word %in% o_words$word) %>% # only select words nobody else uses
+  top_n(n = 6, n) %>%
+  ggplot(aes(x = reorder(word, n), y = n)) +
+  geom_col(show.legend = FALSE) +
+  ylab("") + xlab("") +
+  coord_flip() +
+  ggtitle("Unique words of niha")
