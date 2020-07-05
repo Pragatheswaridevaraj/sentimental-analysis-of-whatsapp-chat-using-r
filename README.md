@@ -1,4 +1,4 @@
-# Sentimental-analysis-of-whatsapp-chat-using-r
+# whatsapp-chat-analysis-using-r
   The main goal of this project is to extract the data from WhatsApp and sentimentally analyze it using rwhatsapp package in Rstudio.
 
 **How extarct data from whatsapp**
